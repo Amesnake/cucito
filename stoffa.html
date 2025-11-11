@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stoffa</title>
+
+<style>
+  body {
+    margin:0;
+    overflow:hidden;
+    background:black;
+    font-family: Helvetica;
+  }
+  canvas {
+    display:block;
+    position:absolute;
+    top:0;
+    left:0;
+  }
+  #text {
+    position: absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+    font-size: 4em;
+    color: white;
+    font-weight: bold;
+    pointer-events: none;
+    text-align: center;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
+    font-family: Helvetica; /* Forza Helvetica */
+    transition: opacity 1s ease; /* transizione morbida di 1 secondo */
+  }
+</style>
+</head>
+<body>
+<canvas id="screenSaver"></canvas>
+<div id="text">Stoffa</div>
+
+<audio id="suono" autoplay>
+  <source src="audio/stoffa.mp3" type="audio/mpeg">
+  Il tuo browser non supporta l'audio.
+</audio>
+
+<script>
+const canvas = document.getElementById('screenSaver');
+const ctx = canvas.getContext('2d');
+const audioElem = document.getElementById('suono');
+
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+});
+
+const squares = [];
+
+function addSquare() {
+  const size = 250 + Math.random() * 500; // quadrati grandi
+  const x = Math.random() * width;
+  const y = Math.random() * height;
+  const rotation = Math.random() * Math.PI * 2;
+  const color = `hsl(${Math.random() * 360}, 50%, 60%)`;
+  squares.push({x, y, size, rotation, color});
+}
+
+function drawSquare(s) {
+  ctx.save();
+  ctx.translate(s.x, s.y);
+  ctx.rotate(s.rotation);
+  ctx.fillStyle = s.color;
+  ctx.globalAlpha = 0.75; // effetto traslucido
+  ctx.fillRect(-s.size/2, -s.size/2, s.size, s.size);
+  ctx.restore();
+}
+
+function animate() {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, width, height);
+
+  squares.forEach(s => drawSquare(s));
+
+  requestAnimationFrame(animate);
+}
+
+// aggiunge un nuovo quadrato ogni 2 secondi
+setInterval(addSquare, 2000);
+
+animate();
+
+// autoplay su mobile
+document.body.addEventListener('click', () => {
+  if(audioElem.paused) audioElem.play();
+});
+</script>
+<script>
+  setTimeout(() => {
+    const text = document.getElementById('text');
+    if (text) {
+      text.style.opacity = '0'; // inizia la transizione
+    }
+  }, 4000); // dopo 4 secondi
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maglia</title>
+
+<style>
+  body {
+    margin:0;
+    overflow:hidden;
+    background:black;
+    font-family: Helvetica;
+  }
+  #text {
+    position: absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+    font-size: 5em;
+    color: white;
+    font-weight: bold;
+    pointer-events: none;
+    text-align: center;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
+    transition: opacity 1s ease; /* transizione morbida di 1 secondo */
+  }
+</style>
+</head>
+<body>
+<canvas id="screenSaver"></canvas>
+<div id="text">Maglia</div>
+
+<audio id="suono" autoplay>
+  <source src="audio/maglia.mp3" type="audio/mpeg">
+  Il tuo browser non supporta l'audio.
+</audio>
+
+<script>
+const canvas = document.getElementById('screenSaver');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+});
+
+// Funzione per colori pastello casuali
+function pastelColor() {
+  const h = Math.floor(Math.random()*360);
+  const s = 40 + Math.random()*20;
+  const l = 70 + Math.random()*15;
+  return `hsl(${h}, ${s}%, ${l}%)`;
+}
+
+// Lista dei quadrati già entrati
+const squares = [];
+
+// Stato del quadrato attuale in entrata
+let currentSquare = {
+  x: -width/2,      // parte da sinistra
+  width: width/2,
+  height: height,
+  color: pastelColor(),
+  entering: true,
+  side: 'left'
+};
+
+let nextSide = 'right'; // alternanza sinistra/destra
+
+function addNewSquare() {
+  currentSquare = {
+    x: (nextSide === 'left') ? -width/2 : width,
+    width: width/2,
+    height: height,
+    color: pastelColor(),
+    entering: true,
+    side: nextSide
+  };
+  nextSide = (nextSide === 'left') ? 'right' : 'left';
+}
+
+function animate() {
+  ctx.clearRect(0,0,width,height);
+
+  // disegna quadrati già fermi
+  squares.forEach(sq => {
+    ctx.fillStyle = sq.color;
+    ctx.fillRect(sq.x, 0, sq.width, sq.height);
+  });
+
+  // animazione quadrato corrente
+  if(currentSquare.entering) {
+    const speed = 4; // velocità entrata
+    if(currentSquare.side === 'left') {
+      currentSquare.x += speed;
+      if(currentSquare.x >= 0) {
+        currentSquare.x = 0;
+        currentSquare.entering = false;
+        squares.push({...currentSquare});
+        setTimeout(addNewSquare, 500); // nuovo quadrato tra 0.5s
+      }
+    } else { // right
+      currentSquare.x -= speed;
+      if(currentSquare.x <= width/2) {
+        currentSquare.x = width/2;
+        currentSquare.entering = false;
+        squares.push({...currentSquare});
+        setTimeout(addNewSquare, 500);
+      }
+    }
+
+    ctx.fillStyle = currentSquare.color;
+    ctx.fillRect(currentSquare.x, 0, currentSquare.width, currentSquare.height);
+  }
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// autoplay su mobile
+const audioElem = document.getElementById('suono');
+document.body.addEventListener('click', () => {
+  if(audioElem.paused) audioElem.play();
+});
+</script>
+<script>
+  setTimeout(() => {
+    const text = document.getElementById('text');
+    if (text) {
+      text.style.opacity = '0'; // inizia la transizione
+    }
+  }, 4000); // dopo 4 secondi
+</script>
+</body>
+</html>

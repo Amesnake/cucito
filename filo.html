@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filo</title>
+
+<style>
+  body {
+    margin:0;
+    overflow:hidden;
+    background:black;
+    font-family: helvetica;
+  }
+  canvas {
+    display:block;
+    position:absolute;
+    top:0;
+    left:0;
+  }
+  #text {
+    position: absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+    font-size: 5em;
+    color: white;
+    font-weight: bold;
+    pointer-events: none;
+    text-align: center;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
+    transition: opacity 1s ease; /* transizione morbida di 1 secondo */
+    
+  }
+</style>
+</head>
+<body>
+<canvas id="screenSaver"></canvas>
+<div id="text">Filo</div>
+
+<!-- Audio inserito come richiesto -->
+<audio id="suono" autoplay>
+  <source src="audio/filo.mp3" type="audio/mpeg">
+  Il tuo browser non supporta l'audio.
+</audio>
+
+<script>
+const canvas = document.getElementById('screenSaver');
+const ctx = canvas.getContext('2d');
+const audioElem = document.getElementById('suono');
+
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+});
+
+// Più fili, movimento lento e morbido
+const threads = [];
+const numThreads = 30; // più fili
+
+for (let i = 0; i < numThreads; i++) {
+  threads.push({
+    x: Math.random() * width,
+    y: (height / numThreads) * i + Math.random() * 30,
+    speed: 0.008 + Math.random() * 0.02, // movimento lento
+    amplitude: 30 + Math.random() * 70,
+    frequency: 0.0006 + Math.random() * 0.001,
+    offset: Math.random() * 1000,
+    color: `hsl(${Math.random() * 360}, 20%, 75%)`
+  });
+}
+
+let t = 0;
+
+function animate() {
+  // sfondo che si “ricuce” lentamente
+  ctx.fillStyle = "rgba(0,0,0,0.08)";
+  ctx.fillRect(0, 0, width, height);
+
+  t += 0.1;
+
+  threads.forEach(th => {
+    ctx.beginPath();
+    ctx.strokeStyle = th.color;
+    ctx.lineWidth = 1 + Math.random() * 0.5;
+    ctx.globalAlpha = 0.7;
+
+    for (let x = 0; x < width; x += 6) {
+      const y = th.y + Math.sin(x * th.frequency + t * th.speed + th.offset) * th.amplitude;
+      ctx.lineTo(x, y);
+    }
+
+    ctx.stroke();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// autoplay su mobile (richiede interazione)
+document.body.addEventListener('click', () => {
+  if(audioElem.paused) audioElem.play();
+});
+
+</script>
+<script>
+  setTimeout(() => {
+    const text = document.getElementById('text');
+    if (text) {
+      text.style.opacity = '0'; // inizia la transizione
+    }
+  }, 4000); // dopo 4 secondi
+</script>
+
+
+</body>
+</html>
